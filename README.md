@@ -43,12 +43,12 @@
 
 ---
 
-## 技術棧 (建議)
+## 技術棧
 
 | 類別 | 技術 |
 |------|------|
 | 語言 | Python 3.x |
-| 影像處理 | OpenCV, YOLO (v8/v10), PyTorch / TensorFlow |
+| 影像處理 | OpenCV, YOLO (v26), PyTorch / TensorFlow |
 | OCR | PaddleOCR / Tesseract |
 | 自動化 | Selenium / Playwright (網頁表單填充) |
 | 資料處理 | Pandas, Geopy |
@@ -58,6 +58,7 @@
 ## 開發日誌
 
 - **2026-04-19**：專案初始化與架構規劃，建立OCR和YOLO。下步要自己訓練YOLO 模型。
+- **2026-04-20**：利用RTX 3050(4GB)跑辨識車牌的模型，dataset from https://huggingface.co/datasets/EZCon/taiwan-license-plate-recognition
 
 ---
 
