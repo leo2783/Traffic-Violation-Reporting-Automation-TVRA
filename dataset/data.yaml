@@ -1,6 +1,0 @@
-path: C:/Users/user1/Documents/Traffic violation reporting/dataset # 資料集根目錄
-train: images/train # 相對於 path 的訓練集路徑
-val: images/val     # 相對於 path 的驗證集路徑
-
-nc: 1               # Number of Classes (類別總數)
-names: ['plate']    # 類別名稱列表
