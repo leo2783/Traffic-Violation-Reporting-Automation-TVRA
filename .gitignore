@@ -143,6 +143,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+data/unlabeled_pictures/
 
 # Spyder project settings
 .spyderproject
@@ -205,3 +206,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# --- YOLO 與專案自訂忽略 ---
+# 忽略標註快取檔
+dataset/**/*.cache
+
+# 忽略訓練產生的超大權重檔與結果
+runs/
+runs1/
+*.ptdataset1/
