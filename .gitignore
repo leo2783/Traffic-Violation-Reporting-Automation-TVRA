@@ -207,11 +207,24 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# --- YOLO »P±M®×¦Û­q©¿²¤ ---
-# ©¿²¤¼Ðµù§Ö¨úÀÉ
+# --- YOLO ï¿½Pï¿½Mï¿½×¦Û­qï¿½ï¿½ï¿½ï¿½ ---
+# ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½Ö¨ï¿½ï¿½ï¿½
 dataset/**/*.cache
 
-# ©¿²¤°V½m²£¥Íªº¶W¤jÅv­«ÀÉ»Pµ²ªG
+# ï¿½ï¿½ï¿½ï¿½ï¿½Vï¿½mï¿½ï¿½ï¿½Íªï¿½ï¿½Wï¿½jï¿½vï¿½ï¿½ï¿½É»Pï¿½ï¿½ï¿½G
 runs/
 runs1/
 *.ptdataset1/
+
+auto.py
+clean_data.py
+convert.py
+data_collect.py
+extract_frames.py
+huggleface.py
+protocl.py
+Requriement.md
+negative_sample
+auto_labeled_top20
+auto_labeled_top20/labels
+positive
