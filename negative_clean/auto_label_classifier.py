@@ -18,7 +18,7 @@ class AutoLabelClassifier:
         self.auto_images_dir = auto_images_dir
         self.auto_labels_dir = auto_labels_dir
 
-    def cluster_and_select(self, candidates, top_k=20):
+    def cluster_and_select(self, candidates, top_k=5):
         """
         K-Means 分群並選取每群信心度前 N 名 (Auto Labeled)
         :param candidates: 包含候選資料資訊的字典列表，格式需包含:
@@ -39,7 +39,7 @@ class AutoLabelClassifier:
         
         print("Performing K-Means clustering for auto_labeled...")
         # 決定群組數量，最多分 10 群
-        n_clusters = min(10, len(candidates)) 
+        n_clusters = min(30, len(candidates)) 
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         clusters = kmeans.fit_predict(features)
         

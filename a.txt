@@ -1,2 +1,0 @@
-# 1280 畫質 + Small 模型 + 開啟混合精度節省顯存
-yolo task=detect mode=train data=dataset/data.yaml model=yolo26s.pt epochs=100 imgsz=960 batch=4 amp=True workers=8

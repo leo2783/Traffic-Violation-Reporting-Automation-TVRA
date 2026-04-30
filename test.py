@@ -3,8 +3,8 @@ import os
 import cv2
 
 # 載入模型
-model = YOLO(r"C:/Users/user1/Documents/Traffic violation reporting/taiwan_plate/weights/best.onnx")
-video_dir = r"C:/Users/user1/Videos/test_video"
+model = YOLO(r"C:/Users/qet63/Documents/Traffic-Violation-Reporting-Automation-TVRA-/YOLO_V4_Result/train/weights/best.engine")
+video_dir = r"C:/Users/qet63/Videos/test_video"
 video_list = [f for f in os.listdir(video_dir) if f.lower().endswith(('.mp4', '.avi', '.mov', '.ts'))]
 
 print("Start!!")
@@ -24,9 +24,7 @@ for i in video_list:
     
     print(f"正在處理: {i} (原始尺寸: {width}x{height})")
     
-    # 修正重點：
-    # 1. 增加 stream=True：防止記憶體溢出
-    # 2. 強制 imgsz=1280：對齊你 ONNX 要求的輸入尺寸，YOLO 會自動 letterbox（補黑邊縮放）保持比例
+   
     results = model.predict(
         source=video_path,
         conf=0.7,

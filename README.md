@@ -54,6 +54,13 @@
 | 資料處理 | Pandas, K-means,自行開發的小工具(FileCompareTool),numpy |
 
 ---
+
+## 技術文件
+關於自動化抽樣流水線的深入技術細節，請參閱：
+- [流水線技術細節 (中文)](./negative_clean/PIPELINE_DETAILS_zh.md)
+- [Pipeline Technical Details (English)](./negative_clean/PIPELINE_DETAILS_en.md)
+
+---
 ##
 - 目前進度：有version 4，打算採用seg模型能更加精準適配真實道路情況，正在標註第五版的dataset。
 - 下個階段：把框找出來後使用OpenCV實作OCR。
