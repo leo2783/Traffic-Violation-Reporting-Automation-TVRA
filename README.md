@@ -60,13 +60,7 @@
 
 ## 開發日誌
 
-- **2026-04-19**：專案初始化與架構規劃，建立OCR和YOLO。下步要自己訓練YOLO 模型。
-- **2026-04-20**：利用RTX 3050(4GB)跑辨識車牌的模型，dataset from https://huggingface.co/datasets/EZCon/taiwan-license-plate-recognition
-- **2026-04-21**：跑version 2模型微調，模型使用yolo26n.pt，利用version 1辨識資料，搭配yolo26s.pt辨識，行車紀錄器畫面(一秒5 frame)。另外利用隨機抽frame加上人工labeling。今天用了許多檔案合併跟搬運。
-- **2026-04-22**：本地顯卡無法支援模型訓練。採用colab A100，訓練過程5小時。
-- **2026-04-22到2026-04-24**：資料清洗，建立yolo tool等移動檔案、資料清洗等工具。
-- **2026-04-25到2026-04-26**：資料清洗，用colab訓練version 3，mAp 50突破0.92\
-- **2026-04-27**：確認標註檔，清洗dataset，訓練version4，過程中梯度爆炸。後來成功train 出 version 4。
+開發過程的詳細紀錄、模型版本演進與遭遇的技術挑戰，請參閱獨立的 [開發日誌 (DEVELOPMENT_LOG.md)](./DEVELOPMENT_LOG.md)。
 
 ---
 
