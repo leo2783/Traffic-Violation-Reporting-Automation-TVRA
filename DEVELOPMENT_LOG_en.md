@@ -4,6 +4,14 @@ This document details the development journey of this project, including model v
 
 ---
 
+## 2026-05-01 to 2026-05-02
+**Automated Deduplication Filtering Mechanism (Sampling)**
+- **High-Dimensional Feature Extraction & Deduplication**: Developed the `sampling` module, integrating MobileNetV3 to convert images into high-dimensional feature vectors (Embeddings). By calculating a Cosine Similarity matrix, the system quickly and accurately filters out redundant dashcam frames. For detailed technical implementations and algorithm workflows, please refer to: [Sampling Module Implementation Details](./sampling/detail/SAMPLING_DETAILS_en.md).
+- **Pending Implementation**:
+  - **Smart Cluster Classifier**: Plan to introduce the K-Means clustering algorithm to categorize features of deduplicated images and assign dynamic sampling probabilities based on cluster distribution, thereby further enhancing dataset diversity.
+- **Future Work**:
+  - Explore the implementation of "Negative Sample Mining based on Contrastive Learning" to improve the performance of advanced retrieval models (Reference: Research by Tsai-Tsung, Chen).
+
 ## 2026-04-28 to 2026-04-30
 **Model Optimization, Hardware Acceleration, and Deployment Testing**
 - **In Progress**: Data cleaning preparations using `yolo26s-seg`.

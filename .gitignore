@@ -78,6 +78,7 @@ data/unlabeled_pictures/
 negative_sample/
 auto_labeled_top20/
 positive/
+to_check/
 
 # 暫時不納入版控的工具腳本
 auto.py
