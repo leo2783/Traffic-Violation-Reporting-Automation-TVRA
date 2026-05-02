@@ -9,7 +9,7 @@ This module implements a two-stage image filtering mechanism:
 
 ```mermaid
 graph TD
-    A[Start: Input Image Paths List] --> B{Enable Confident Sample?}
+    A[Start: Input Image Paths List] --> B{"Enable Confident Sample?"}
     
     B -- Yes --> C[YOLO Inference]
     C --> C1[Get Prediction Confidence & Box Counts]
@@ -21,15 +21,15 @@ graph TD
     D --> E[Convert to NumPy Array & Flatten]
     E --> F[Calculate Cosine Similarity Matrix]
     
-    F --> G{Box Counts Provided?}
+    F --> G{"Box Counts Provided?"}
     G -- Yes --> H[Compare Box Counts of Image Pairs]
-    H --> I{Box Counts Match?}
+    H --> I{"Box Counts Match?"}
     I -- No --> J[Force Similarity to 0]
     I -- Yes --> K
     G -- No --> K[Keep Original Similarity]
     J --> K
     
-    K --> L{Similarity > Threshold (Default 0.95)?}
+    K --> L{"Similarity > Threshold (Default 0.95)?"}
     L -- Yes --> M[Mark as Duplicate & Filter Out]
     L -- No --> N[Keep as Unique Image]
     
