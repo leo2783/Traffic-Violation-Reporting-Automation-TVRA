@@ -3,16 +3,16 @@ from pathlib import Path
 from embedding import ImageDeduplicator
 
 # 1. 設定原始資料夾與目標資料夾
-folder = Path(r"C:/Users/qet63/Pictures/positive/images")
+folder = Path(r"C:/Users/qet63/Documents/Traffic-Violation-Reporting-Automation-TVRA-/negative_sample")
 # 新增一個用來存放乾淨圖片的資料夾路徑
-output_folder = Path(r"C:/Users/qet63/Documents/Traffic-Violation-Reporting-Automation-TVRA-/cleaned_images")
+output_folder = Path(r"C:/Users/qet63/Documents/Traffic-Violation-Reporting-Automation-TVRA-/cleaned_images1")
 
 # 讀取並替換路徑斜線
 file_list = [str(f.resolve()).replace("\\", "/") for f in folder.iterdir() if f.is_file()]
 
 # 2. 執行去重邏輯，取得保留清單
 print("開始執行圖片去重分析...")
-final_files = ImageDeduplicator().process_batch(file_list, confident=True, sample_way="positive")
+final_files = ImageDeduplicator(threshold=0.90).process_batch(file_list, confident=True, sample_way="negative")
 
 print(f"原始圖片數量: {len(file_list)}")
 print(f"去重後保留數量: {len(final_files)}")

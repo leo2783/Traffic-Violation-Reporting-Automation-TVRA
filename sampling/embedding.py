@@ -5,15 +5,36 @@ import torchvision.transforms as transforms
 from PIL import Image,ImageOps
 import os
 from ultralytics import YOLO
+from tqdm import tqdm
+
+class YoloAnalyzer:
+    def __init__(self, model_path="C:/Users/qet63/Documents/Traffic-Violation-Reporting-Automation-TVRA-/YOLO_V4_Result/train/weights/best.pt"):
+        self._model = YOLO(model_path, task="detect")
+        
+    def analyze(self, image_paths: list, sample_way: str):
+        detect_results = []
+        print(f"即將進行 YOLO 分析，共 {len(image_paths)} 張圖片...")
+        for name in tqdm(image_paths, desc="YOLO 分析進度"):
+            results = self._model.predict(name, verbose=False)
+            box_count = len(results[0].boxes)
+            if box_count > 0:
+                conf = results[0].boxes.conf.max().item()
+            else:
+                conf = 0.0
+            detect_results.append((name, conf, box_count))
+            
+        if sample_way == "positive":
+            detect_results.sort(key=lambda x: x[1])
+        elif sample_way == "negative":
+            detect_results.sort(key=lambda x: x[1], reverse=True)
+        return detect_results
 
 class ImageDeduplicator:
     def __init__(self, threshold=0.95):
         self._threshold = threshold
         # 1. 初始化並載入模型
         self._weights = models.MobileNet_V3_Small_Weights.IMAGENET1K_V1
-        self._yolo_model = YOLO(r"C:/Users/qet63/Documents/Traffic-Violation-Reporting-Automation-TVRA-/YOLO_V4_Result/train/weights/best.pt",
-                             task="detect"
-                             )
+        self._yolo_analyzer = YoloAnalyzer(r"C:/Users/qet63/Documents/Traffic-Violation-Reporting-Automation-TVRA-/YOLO_V4_Result/train/weights/best.pt")
         self._model = models.mobilenet_v3_small(weights=self._weights)
         self._model.classifier = torch.nn.Identity()
         self._model.eval()
@@ -38,31 +59,13 @@ class ImageDeduplicator:
         if os.path.exists(path):
             return path.lower().endswith(supported_formats)
         return False
-    def _confident_sample(self,image_paths:list,sample_way):
-        detect_results = []
-        print("Predicting...")
-        for name in image_paths:
-            results = self._yolo_model.predict(name,verbose=False)
-            box_count = len(results[0].boxes)
-            if box_count > 0:
-                conf = results[0].boxes.conf.max().item()
-            else:
-                conf = 0.0
-            detect_results.append((name, conf,box_count))
-            
-        
-        if sample_way=="positive":
-            detect_results.sort(key=lambda x: x[1])
-        elif sample_way=="negative":
-            detect_results.sort(key=lambda x: x[1], reverse=True)
-        return detect_results
     def process_batch(self, image_paths:list,confident=False,sample_way="positive"):
         """接收一串圖片路徑，回傳不重複的路徑清單"""
         # 1. 收集所有圖片的 Embedding
         embeddings = []
         box_counts = []
         if confident:
-            scored_paths = self._confident_sample(image_paths=image_paths, sample_way=sample_way)
+            scored_paths = self._yolo_analyzer.analyze(image_paths=image_paths, sample_way=sample_way)
             image_paths = [item[0] for item in scored_paths]
             box_counts = [item[2] for item in scored_paths]
         
