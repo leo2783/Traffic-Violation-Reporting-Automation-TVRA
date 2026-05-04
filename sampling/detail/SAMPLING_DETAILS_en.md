@@ -1,58 +1,68 @@
 # Sampling Module Implementation Details
 
 ## Overview
-The core purpose of the Sampling module (`sampling/`) is to automate the filtering and cleaning of large amounts of redundant or similar images extracted from dashcams. It achieves this by combining deep learning feature extraction with object detection. The module primarily consists of `main.py` and `embedding.py` (which contains the `ImageDeduplicator` class).
+The core purpose of the Sampling2 module is to automate the filtering and cleaning of large amounts of redundant images extracted from dashcams, and to perform high-quality negative sampling and validation set cleaning. The refactored version (`sampling/`) greatly optimizes performance and architecture by encapsulating feature extraction and model inference, improving similarity matrix calculations, and supporting parameterized execution via CLI.
 
 ## Algorithm Workflow
 
-This module implements a two-stage image filtering mechanism:
+This module involves two main stages: image deduplication and sampling. The workflow is as follows:
 
 ```mermaid
 graph TD
-    A[Start: Input Image Paths List] --> B{"Enable Confident Sample?"}
-    
-    B -- Yes --> C[YOLO Inference]
-    C --> C1[Get Prediction Confidence & Box Counts]
-    C1 --> C2[Sort by Positive/Negative Mode]
-    C2 --> D
-    
-    B -- No --> D[MobileNetV3 Feature Extraction]
-    
-    D --> E[Convert to NumPy Array & Flatten]
-    E --> F[Calculate Cosine Similarity Matrix]
-    
-    F --> G{"Box Counts Provided?"}
-    G -- Yes --> H[Compare Box Counts of Image Pairs]
-    H --> I{"Box Counts Match?"}
-    I -- No --> J[Force Similarity to 0]
-    I -- Yes --> K
-    G -- No --> K[Keep Original Similarity]
-    J --> K
-    
-    K --> L{"Similarity > Threshold (Default 0.95)?"}
-    L -- Yes --> M[Mark as Duplicate & Filter Out]
-    L -- No --> N[Keep as Unique Image]
-    
-    M --> O[Output Final Kept List]
-    N --> O
-    O --> P[End]
+    A[Start: Input Images] --> B[Feature Extraction: MobileNetV3]
+    B --> C[Calculate Similarity Tensor]
+    C --> D{Deduplication: Similarity > 0.90}
+    D -- Discard --> H[End: Output Images]
+    D -- Keep --> E[YOLO Inference: Confidence]
+    E --> F[UMAP + HDBSCAN: Dimensionality Reduction & Clustering]
+    F --> G[Sample by Softmax Probabilities]
+    G --> H
 ```
 
-## Core Technical Details
+## Core Technical & Architectural Improvements
 
-### 1. YOLO Confident Sampling
-- **Model Used**: Loads the trained YOLOv4 model (targeted at license plates/traffic violations).
-- **Logic**: Performs preliminary predictions on every image in the list to obtain bounding box confidences. If the goal is to retain high-confidence samples (`positive`), it sorts the list in ascending order of confidence. This ensures that during the subsequent deduplication process, higher-confidence images are prioritized and kept.
+### 1. Shared Logic Extraction (`utils.py`)
+- **Feature Extraction & Inference Encapsulation**: Extracted the loading and feature extraction of MobileNetV3 (`FeatureExtractor`) and the inference wrapper for the YOLO model (`YoloAnalyzer`).
+- **Automatic GPU Acceleration**: All neural network computations automatically detect and utilize the GPU (`cuda`) to enhance processing speed.
+- **Exception Handling**: Added a safe image reading mechanism (`safe_image_open`) to ensure that corrupt images are skipped with a warning rather than causing the program to crash.
 
-### 2. Feature Vector Extraction (Embedding)
-- **Model Selection**: Employs the lightweight `MobileNet_V3_Small`. It is fast and highly effective at capturing high-dimensional semantic features of images.
-- **Processing**:
-  - Replaces the classification layer with `nn.Identity()` to directly output a 1D embedding vector.
-  - Applies padding (to 224x224) and normalization to the input image before feeding it to the model.
+### 2. OOM and Performance Bottleneck Resolution (`embedding.py`)
+- Upgraded the similarity matrix calculation from `np.dot` to PyTorch's Tensor operations (`torch.mm`).
+- This enables large matrix multiplications to be executed directly on the GPU, drastically improving performance during bulk image deduplication and preventing Out-Of-Memory (OOM) errors.
 
-### 3. Cosine Similarity & Forced Filtering
-- **Matrix Operations**: Utilizes NumPy matrix multiplication to rapidly compute the Cosine Similarity across all extracted image features.
-- **Box Counts Protection Mechanism**: If two images have exceptionally high similarity, but the predicted number of bounding boxes (Box Counts) from YOLO differs, the algorithm uses a Boolean mask to force their similarity score to zero. This effectively prevents the false deletion of images in scenarios where "the background is nearly identical, but one image has a car and the other does not."
+### 3. Execution and Usage (CLI Commands)
 
-## Execution and Usage
-The entry point of the module is `main.py`. Upon execution, the script reads a specified directory, retrieves the filtered list of image paths via `ImageDeduplicator().process_batch()`, and copies the uniquely retained images into a new `cleaned_images` directory.
+All scripts have removed hardcoded paths and now rely on `argparse` for dynamic parameter input. Use the `-h` or `--help` flag for detailed usage instructions.
+
+#### 3.1 Image Deduplication (`main.py`)
+Filters highly similar redundant images based on image features or YOLO confidence.
+```bash
+python sampling/main.py \
+    --input_folder "Path to your original image folder" \
+    --output_folder "Output path for deduplicated images" \
+    --threshold 0.90 \
+    --yolo_weights "Path to your best weights file (best.pt)" \
+    --use_confidence
+```
+*(If you do not need to deduplicate based on YOLO confidence, you can omit `--use_confidence` and `--yolo_weights`)*
+
+#### 3.2 Negative Sampling (`sampling.py`)
+Utilizes UMAP for dimensionality reduction and HDBSCAN for clustering, then converts the average YOLO confidence of each cluster into a sampling probability to extract a specified number of negative samples from the deduplicated images.
+```bash
+python sampling/sampling.py \
+    --input_folder "Path to deduplicated image folder" \
+    --output_folder "Output path for sampled results" \
+    --num_samples 400 \
+    --yolo_weights "Path to your best weights file (best.pt)" \
+    --temperature 5.0
+```
+
+#### 3.3 Validation Set Cleaning (`val_clean.py`)
+Filters images from a specified folder based on a given YOLO confidence threshold (default 0.6) and automatically creates corresponding YOLO format `images` and `labels` annotation files.
+```bash
+python sampling/val_clean.py \
+    --source_path "Source image folder path" \
+    --out_path "Output folder path for cleaned images" \
+    --yolo_weights "Path to your best weights file (best.pt)" \
+    --threshold 0.6
+```

@@ -39,6 +39,7 @@ venv.bak/
 .pdm-build/
 .pixi/
 __pypackages__/
+.clinerules
 # Pipfile.lock
 # uv.lock
 # poetry.lock
@@ -79,6 +80,7 @@ negative_sample/
 auto_labeled_top20/
 positive/
 to_check/
+YOLO_V5_datasets/
 
 # 暫時不納入版控的工具腳本
 auto.py
