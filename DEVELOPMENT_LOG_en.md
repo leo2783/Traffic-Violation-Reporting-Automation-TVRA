@@ -4,11 +4,18 @@ This document details the development journey of this project, including model v
 
 ---
 
-## 2026-05-01 to 2026-05-02
+## 2026-05-04 to 2026-05-05
+**Multi-resolution Model Training and Labeling Issue Resolution**
+- **Multi-resolution Model Training**: Conducted training tests with different resolutions using different hardware:
+  - Trained `test1` at `1280` resolution using an RTX 4090.
+  - Trained `test2` at `960` resolution using an RTX 5070.
+- **Poly Image Annotation Issue**: Discovered labeling errors during the training phase. Pre-training checks via `check_label.py` confirmed that a total of 79 Poly images in the dataset had invalid annotations (64 in train, 15 in val; specifically self-intersecting polygon segments). **An Issue has been posted to track and resolve this problem**.
+
+## 2026-05-01 to 2026-05-03
 **Automated Deduplication Filtering Mechanism (Sampling)**
-- **High-Dimensional Feature Extraction & Deduplication**: Developed the `sampling` module, integrating MobileNetV3 to convert images into high-dimensional feature vectors (Embeddings). By calculating a Cosine Similarity matrix, the system quickly and accurately filters out redundant dashcam frames. For detailed technical implementations and algorithm workflows, please refer to: [Sampling Module Implementation Details](./sampling/detail/SAMPLING_DETAILS_en.md).
-- **Pending Implementation**:
-  - **Smart Cluster Classifier**: Plan to introduce the K-Means clustering algorithm to categorize features of deduplicated images and assign dynamic sampling probabilities based on cluster distribution, thereby further enhancing dataset diversity.
+- **High-Dimensional Feature Extraction & Deduplication**: Developed the `sampling` module, integrating MobileNetV3 to convert images into high-dimensional feature vectors (Embeddings). To achieve high-speed computation, PyTorch is utilized for GPU-accelerated tensor matrix operations, calculating a Cosine Similarity matrix to accurately filter out redundant frames. For detailed technical implementations and algorithm workflows, please refer to: [Sampling Module Implementation Details](./sampling/detail/SAMPLING_DETAILS_en.md).
+- **Multi-layered Filtering Strategy**: Discarded the planned K-Means clustering in favor of **Bounding Box Count Comparison** and **YOLO Confidence Sorting**. The system only flags images as duplicates when both box counts are identical and feature similarity meets the threshold, ensuring rigorous and high-quality data cleaning.
+- **Data Cleaning & Dataset Organization**: The design of the data cleaning and deduplication algorithm continued through May 3. The comprehensive organization of the dataset was fully completed on May 3.
 - **Future Work**:
   - Explore the implementation of "Negative Sample Mining based on Contrastive Learning" to improve the performance of advanced retrieval models (Reference: Research by Tsai-Tsung, Chen).
 

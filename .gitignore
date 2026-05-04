@@ -68,7 +68,6 @@ dataset/**/*.cache
 # 訓練結果與權重
 runs/
 runs1/
-*.pt
 dataset1/
 
 # ==========================================
@@ -81,6 +80,8 @@ auto_labeled_top20/
 positive/
 to_check/
 YOLO_V5_datasets/
+YOLO_V5_datasets/README.md
+untitled/
 
 # 暫時不納入版控的工具腳本
 auto.py
@@ -138,3 +139,5 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+yolo26n.pt
+yolo26s-seg.pt

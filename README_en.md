@@ -1,5 +1,7 @@
 # Traffic Violation Reporting Automation (TVRA)
 
+[中文版本](README.md)
+
 This is a development project aimed at simplifying the traffic violation reporting process using AI image recognition and automated workflows. The project evolves from basic license plate and violation identification to a fully automated reporting system.
 
 ---
