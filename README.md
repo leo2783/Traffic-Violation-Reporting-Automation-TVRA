@@ -67,13 +67,13 @@
 
 ## 技術文件
 關於自動化抽樣流水線的深入技術細節，請參閱：
-- [流水線技術細節 (中文)](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)
+- [技術細節 (中文)](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)
 - [Pipeline Technical Details (English)](./Tools/sampling/detail/SAMPLING_DETAILS_en.md)
 
 ---
 ##
 - 目前進度：有version 5，正在測試不同的dataset對於模型表現的影響。
-- 下個階段：把框找出來後使用OpenCV實作OCR。
+- 下個階段：把框找出來後使用OpenCV+Paddle+OCR實作OCR。
 
 ## 開發日誌
 

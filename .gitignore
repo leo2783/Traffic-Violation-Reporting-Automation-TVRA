@@ -86,9 +86,7 @@ untitled/
 # 暫時不納入版控的工具腳本
 auto.py
 clean_data.py
-convert.py
 data_collect.py
-extract_frames.py
 huggleface.py
 protocl.py
 Requriement.md
