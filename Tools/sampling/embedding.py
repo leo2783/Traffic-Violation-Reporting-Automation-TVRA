@@ -1,7 +1,11 @@
 import numpy as np
 import torch
 import os
+import re
+import shutil
 import logging
+from collections import defaultdict
+from pathlib import Path
 from typing import List, Optional, Callable
 from utils import FeatureExtractor, YoloAnalyzer, path_check, get_device
 
@@ -25,11 +29,6 @@ class ImageDeduplicator:
         
         :param progress_callback: 進度回呼，格式 callback(current_step, total_steps)
         """
-        import shutil
-        import os
-        from collections import defaultdict
-        from pathlib import Path
-        
         if use_confidence and not self._yolo_analyzer:
             raise ValueError("必須提供 yolo_weights 才能使用 YOLO 信心度進行排序")
 
@@ -66,68 +65,46 @@ class ImageDeduplicator:
         # 轉換為 PyTorch Tensor 以進行高速矩陣運算
         embeddings_matrix = torch.tensor(np.array(embeddings), device=self._feature_extractor.device)
         
-        logger.info("開始計算相似度與執行寫入策略...")
+        logger.info("開始計算全局相似度矩陣...")
+        # 一次性計算出所有要保留的 index，確保 PyTorch 批次運算效能最大化
+        keep_indices = self._calculate_duplicates(embeddings_matrix, valid_box_counts)
+        
+        logger.info(f"相似度計算完成，開始執行 '{write_mode}' 寫入策略...")
         final_keep_paths = []
         
         if write_mode == "per-frame":
-            # 逐幀處理：對於每一個圖片，計算它與前面已保留圖片的相似度
-            kept_indices = []
-            for i in range(len(valid_paths)):
-                is_duplicate = False
-                if kept_indices:
-                    # 取出當前圖片的特徵
-                    current_emb = embeddings_matrix[i:i+1]
-                    # 取出已保留圖片的特徵
-                    kept_embs = embeddings_matrix[kept_indices]
+            # 逐幀模式：立刻按順序拷貝並輸出日誌
+            for idx in keep_indices:
+                path = valid_paths[idx]
+                final_keep_paths.append(path)
+                if output_folder:
+                    file_name = Path(path).name
+                    dest_path = Path(output_folder) / file_name
+                    shutil.copy(path, dest_path)
+                    logger.info(f"[Per-Frame] 已寫入不重複圖片: {file_name}")
                     
-                    # 計算相似度
-                    norms_current = torch.norm(current_emb, dim=1, keepdim=True) + 1e-10
-                    norms_kept = torch.norm(kept_embs, dim=1, keepdim=True) + 1e-10
-                    norm_current = current_emb / norms_current
-                    norm_kept = kept_embs / norms_kept
-                    sim_matrix = torch.mm(norm_current, norm_kept.t())
-                    
-                    if valid_box_counts:
-                        current_count = valid_box_counts[i]
-                        kept_counts = torch.tensor([valid_box_counts[idx] for idx in kept_indices], device=self._feature_extractor.device)
-                        same_box_matrix = (current_count == kept_counts).unsqueeze(0)
-                        sim_matrix = sim_matrix * same_box_matrix.float()
-                        
-                    if torch.any(sim_matrix > self._threshold):
-                        is_duplicate = True
-                
-                if not is_duplicate:
-                    kept_indices.append(i)
-                    path = valid_paths[i]
-                    final_keep_paths.append(path)
-                    if output_folder:
-                        file_name = Path(path).name
-                        dest_path = Path(output_folder) / file_name
-                        shutil.copy(path, dest_path)
-                        logger.info(f"[Per-Frame] 寫入: {file_name}")
-                        
         elif write_mode == "per-video":
-            # 逐影片處理：根據 "_frame_" 分組
+            # 逐影片模式：根據檔名前綴分組 (容錯解析)
             video_groups = defaultdict(list)
-            for i, path in enumerate(valid_paths):
+            for idx in keep_indices:
+                path = valid_paths[idx]
                 file_name = Path(path).name
-                if "_frame_" in file_name:
+                
+                # 嘗試使用正則表達式或字串分割來安全地找出影片名
+                # 假設檔名如: 2026_0430_010931_001A_frame_001.jpg
+                match = re.match(r"(.+)_frame_\d+\..+", file_name, re.IGNORECASE)
+                if match:
+                    video_name = match.group(1)
+                elif "_frame_" in file_name:
                     video_name = file_name.split("_frame_")[0]
                 else:
-                    video_name = "unknown"
-                video_groups[video_name].append(i)
+                    video_name = "unknown_video"
+                    
+                video_groups[video_name].append(path)
                 
-            for video_name, indices in video_groups.items():
-                logger.info(f"處理影片群組: {video_name} (共 {len(indices)} 張)")
-                
-                group_embs = embeddings_matrix[indices]
-                group_box_counts = [valid_box_counts[i] for i in indices] if valid_box_counts else []
-                
-                keep_local_indices = self._calculate_duplicates(group_embs, group_box_counts)
-                
-                for local_idx in keep_local_indices:
-                    global_idx = indices[local_idx]
-                    path = valid_paths[global_idx]
+            for video_name, paths in video_groups.items():
+                logger.info(f"正在寫入影片群組: {video_name} (共 {len(paths)} 張唯一的圖片)")
+                for path in paths:
                     final_keep_paths.append(path)
                     if output_folder:
                         file_name = Path(path).name
@@ -135,13 +112,12 @@ class ImageDeduplicator:
                         shutil.copy(path, dest_path)
                 
                 if output_folder:
-                    logger.info(f"[Per-Video] 影片 {video_name} 的去重結果已寫入 ({len(keep_local_indices)} 張)")
+                    logger.info(f"[Per-Video] 影片 {video_name} 寫入完畢。")
                     
         else: # per-folder
             # 全部處理完再一次性寫入
-            keep_indices = self._calculate_duplicates(embeddings_matrix, valid_box_counts)
-            for i in keep_indices:
-                path = valid_paths[i]
+            for idx in keep_indices:
+                path = valid_paths[idx]
                 final_keep_paths.append(path)
                 if output_folder:
                     file_name = Path(path).name

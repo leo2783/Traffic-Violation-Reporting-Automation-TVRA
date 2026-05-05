@@ -18,11 +18,16 @@ class DeduplicationService:
             logger.error(f"輸入資料夾不存在或無效: {input_folder}")
             return
 
-        # 讀取並替換路徑斜線
-        file_list = [str(f.resolve()).replace("\\", "/") for f in input_folder.iterdir() if f.is_file()]
+        # 讀取並過濾出圖片檔案
+        valid_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.webp'}
+        file_list = [
+            f.resolve().as_posix() 
+            for f in input_folder.iterdir() 
+            if f.is_file() and f.suffix.lower() in valid_extensions
+        ]
         
         if not file_list:
-            logger.warning("輸入資料夾內沒有檔案")
+            logger.warning("輸入資料夾內沒有有效的圖片檔案 (支援格式: jpg, jpeg, png, bmp, webp)")
             return
 
         # 執行去重邏輯
