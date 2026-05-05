@@ -28,13 +28,14 @@ class DeduplicationWorker(QThread):
     """處理去重邏輯的背景執行緒"""
     finished = pyqtSignal(bool, str)
     
-    def __init__(self, input_folder, output_folder, threshold, yolo_weights, use_confidence):
+    def __init__(self, input_folder, output_folder, threshold, yolo_weights, use_confidence, write_mode):
         super().__init__()
         self.input_folder = Path(input_folder)
         self.output_folder = Path(output_folder)
         self.threshold = threshold
         self.yolo_weights = yolo_weights
         self.use_confidence = use_confidence
+        self.write_mode = write_mode
 
     def run(self):
         try:
@@ -42,7 +43,8 @@ class DeduplicationWorker(QThread):
             service.execute(
                 input_folder=self.input_folder,
                 output_folder=self.output_folder,
-                use_confidence=self.use_confidence
+                use_confidence=self.use_confidence,
+                write_mode=self.write_mode
             )
             self.finished.emit(True, "去重任務已成功完成！")
         except Exception as e:
@@ -105,6 +107,12 @@ class SamplingGUI(QMainWindow):
         self.sample_way_combo = QComboBox()
         self.sample_way_combo.addItems(["negative", "positive"])
         param_layout.addWidget(self.sample_way_combo)
+        
+        param_layout.addSpacing(20)
+        param_layout.addWidget(QLabel("寫入模式:"))
+        self.write_mode_combo = QComboBox()
+        self.write_mode_combo.addItems(["per-folder", "per-video", "per-frame"])
+        param_layout.addWidget(self.write_mode_combo)
         
         param_group.setLayout(param_layout)
         main_layout.addWidget(param_group)
@@ -213,7 +221,8 @@ class SamplingGUI(QMainWindow):
             output_folder=output_path,
             threshold=self.threshold_spin.value(),
             yolo_weights=self.yolo_edit.text() if self.use_yolo_check.isChecked() else None,
-            use_confidence=self.use_yolo_check.isChecked()
+            use_confidence=self.use_yolo_check.isChecked(),
+            write_mode=self.write_mode_combo.currentText()
         )
         self.worker.finished.connect(self.on_finished)
         self.worker.start()

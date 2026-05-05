@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Callable
 import numpy as np
 
 class BaseDataset(ABC):
@@ -23,8 +23,11 @@ class FeatureExtractorInterface(ABC):
         pass
 
     @abstractmethod
-    def extract_features_from_paths(self, image_paths: List[str]) -> np.ndarray:
-        """批次提取影像特徵向量"""
+    def extract_features_from_paths(self, image_paths: List[str], progress_callback: Optional[Callable[[int, int], None]] = None) -> np.ndarray:
+        """
+        批次提取影像特徵向量
+        :param progress_callback: 可選的進度回呼函數，簽名為 callback(current, total)
+        """
         pass
 
 class ObjectDetectorInterface(ABC):
@@ -35,6 +38,9 @@ class ObjectDetectorInterface(ABC):
         pass
 
     @abstractmethod
-    def analyze(self, image_paths: List[str], sample_way: str) -> List[tuple]:
-        """分析影像列表並根據策略排序"""
+    def analyze(self, image_paths: List[str], sample_way: str, progress_callback: Optional[Callable[[int, int], None]] = None) -> List[tuple]:
+        """
+        分析影像列表並根據策略排序
+        :param progress_callback: 可選的進度回呼函數，簽名為 callback(current, total)
+        """
         pass

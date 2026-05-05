@@ -1,7 +1,7 @@
 import os
 import logging
 from enum import Enum
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Callable
 import numpy as np
 
 import torch
@@ -59,16 +59,19 @@ class FeatureExtractor(FeatureExtractorInterface):
             
         return embedding.squeeze().cpu().numpy()
 
-    def extract_features_from_paths(self, image_paths: List[str]) -> np.ndarray:
+    def extract_features_from_paths(self, image_paths: List[str], progress_callback: Optional[Callable[[int, int], None]] = None) -> np.ndarray:
         """
         Batch processing: extract feature vectors for multiple images, return numpy matrix.
         批次處理：對多張圖片提取特徵向量，回傳 numpy 矩陣。
         """
+        total = len(image_paths)
         features = []
-        for path in image_paths:
+        for idx, path in enumerate(image_paths):
             emb = self.extract_embedding(path)
             if emb is not None:
                 features.append(emb)
+            if progress_callback:
+                progress_callback(idx + 1, total)
         if features:
             return np.vstack(features)
         return np.array([])
@@ -81,7 +84,7 @@ class SampleStrategy(Enum):
     NEGATIVE = "negative"
 
 class YoloAnalyzer(ObjectDetectorInterface):
-    """YOLO 模型推論封裝"""
+    """YOLO 模型推論封裝 (支援批次 GPU 推論與 stream=True 避免 OOM)"""
     def __init__(self, model_path: str) -> None:
         if not isinstance(model_path, str):
             raise TypeError("model_path 必須是字串")
@@ -93,20 +96,59 @@ class YoloAnalyzer(ObjectDetectorInterface):
         self._model_path = model_path
         
     def predict(self, source: Any, **kwargs) -> Any:
+        """執行模型預測，強制使用 GPU 與 stream=True"""
+        # 確保 kwargs 內有 device 設定
+        if "device" not in kwargs:
+            kwargs["device"] = "0" if torch.cuda.is_available() else "cpu"
+        # 確保 stream=True 避免記憶體暴增
+        if isinstance(source, list) and "stream" not in kwargs:
+            kwargs["stream"] = True
+        elif not isinstance(source, list) and "stream" not in kwargs:
+            kwargs["stream"] = True
         return self._model.predict(source, **kwargs)
 
-    def analyze(self, image_paths: List[str], sample_way: str) -> List[tuple]:
-        from tqdm import tqdm
+    def analyze(self, image_paths: List[str], sample_way: str, progress_callback: Optional[Callable[[int, int], None]] = None) -> List[tuple]:
+        """
+        批次分析影像列表並根據策略排序。
+        使用批次推論 (stream=True) 而非單張推論，大幅提升 GPU 使用率。
+        """
         detect_results = []
-        logger.info(f"即將進行 YOLO 分析，共 {len(image_paths)} 張圖片...")
-        for name in tqdm(image_paths, desc="YOLO 分析進度"):
-            try:
-                results = self.predict(name, verbose=False)
-                box_count = len(results[0].boxes)
-                conf = results[0].boxes.conf.max().item() if box_count > 0 else 0.0
-                detect_results.append((name, conf, box_count))
-            except Exception as e:
-                logger.warning(f"YOLO 推論失敗 {name}: {e}")
+        total = len(image_paths)
+        logger.info(f"即將進行 YOLO 批次分析，共 {total} 張圖片...")
+        
+        try:
+            # 批次推論：一次將所有圖片路徑送入模型，避免逐張傳輸 CPU-GPU 瓶頸
+            results = self.predict(image_paths, verbose=False)
+            
+            for idx, result in enumerate(results):
+                try:
+                    name = image_paths[idx] if idx < len(image_paths) else f"image_{idx}"
+                    box_count = len(result.boxes)
+                    conf = result.boxes.conf.max().item() if box_count > 0 else 0.0
+                    detect_results.append((name, conf, box_count))
+                except Exception as e:
+                    logger.warning(f"YOLO 結果解析失敗 (index {idx}): {e}")
+                    detect_results.append((image_paths[idx] if idx < len(image_paths) else f"image_{idx}", 0.0, 0))
+                    
+                if progress_callback:
+                    progress_callback(idx + 1, total)
+                    
+        except Exception as e:
+            logger.error(f"YOLO 批次推論失敗: {e}，降級為逐張處理")
+            # 降級處理：若批次失敗，逐張處理
+            from tqdm import tqdm
+            for idx, name in enumerate(tqdm(image_paths, desc="YOLO 分析進度")):
+                try:
+                    results_iter = self.predict(name, verbose=False)
+                    for r in results_iter:
+                        box_count = len(r.boxes)
+                        conf = r.boxes.conf.max().item() if box_count > 0 else 0.0
+                        detect_results.append((name, conf, box_count))
+                except Exception as e:
+                    logger.warning(f"YOLO 推論失敗 {name}: {e}")
+                    
+                if progress_callback:
+                    progress_callback(idx + 1, total)
                 
         try:
             strategy = SampleStrategy(sample_way.lower())
@@ -124,8 +166,9 @@ class YoloAnalyzer(ObjectDetectorInterface):
     def get_confidence(self, image_path: str) -> float:
         try:
             results = self.predict(image_path, verbose=False)
-            if len(results[0].boxes) > 0:
-                return results[0].boxes.conf.max().item()
+            for r in results:
+                if len(r.boxes) > 0:
+                    return r.boxes.conf.max().item()
         except Exception as e:
             logger.warning(f"YOLO 推論失敗 {image_path}: {e}")
         return 0.0
