@@ -51,9 +51,9 @@
 |------|------|
 | 語言 | Python 3.12 |
 | 影像處理 | OpenCV, YOLO (v26), PyTorch / TensorFlow |
-| OCR | PaddleOCR / Tesseract |
+| OCR | PaddleOCR  |
 | 自動化 | Selenium / Playwright (網頁表單填充) |
-| 資料處理 | Pandas, K-means,自行開發的小工具(FileCompareTool),numpy |
+| 資料處理 | Pandas, ,自行開發的小工具(FileCompareTool),numpy,HDBSCAN,UMAP |
 
 ---
 
@@ -64,7 +64,7 @@
 
 ---
 ##
-- 目前進度：有version 4，打算採用seg模型能更加精準適配真實道路情況，正在標註第五版的dataset。
+- 目前進度：有version 5，正在測試不同的dataset對於模型表現的影響。
 - 下個階段：把框找出來後使用OpenCV實作OCR。
 
 ## 開發日誌
