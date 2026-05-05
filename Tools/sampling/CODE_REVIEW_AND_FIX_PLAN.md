@@ -1,3 +1,4 @@
+
 # Code Review 與 Bug 修復計畫 (2026-05-05)
 
 ## 一、問題分析 (Bug Report)
