@@ -18,14 +18,22 @@ This module involves two main stages: image deduplication and sampling. The work
 
 ```mermaid
 graph TD
-    A[Start: Input Images] --> B[Feature Extraction: MobileNetV3]
-    B --> C[Calculate Similarity Tensor]
-    C --> D{Deduplication: Similarity > 0.90}
-    D -- Discard --> H[End: Output Images]
-    D -- Keep --> E[YOLO Inference: Confidence]
-    E --> F[UMAP + HDBSCAN: Dimensionality Reduction & Clustering]
-    F --> G[Sample by Softmax Probabilities]
-    G --> H
+    A[Start: Input Images] --> B{Use Confidence?}
+    B -- Yes --> C[YOLO Inference & Sort]
+    B -- No --> D[Feature Extraction: MobileNetV3]
+    C --> D
+    D --> E[Calculate Similarity Tensor]
+    E --> F[Box Counts Match]
+    F --> G{Deduplication: Similarity > 0.90?}
+    G -- Yes Duplicate --> H[Discard]
+    G -- No Unique --> I[Keep]
+    
+    %% Sampling phase (sampling.py)
+    I --> J[Negative Sampling]
+    J --> K[UMAP + HDBSCAN: Dimensionality Reduction & Clustering]
+    K --> L[Sample by Softmax Probabilities]
+    L --> M[End: Output Images]
+    H --> M
 ```
 
 ## Core Technical & Architectural Improvements

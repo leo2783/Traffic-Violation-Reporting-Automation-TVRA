@@ -57,10 +57,18 @@
 
 ---
 
+## 初步成果展示
+以下為 YOLO 語意分割模型 (Segmentation) 在測試集上自動生成的預測結果，可精準定位車牌與違規特徵：
+
+![初步成果展示 1](./TaiwanLicensePlate/YOLO/Segement/V5_test1_seg_1280/train/val_batch0_pred.jpg)
+![初步成果展示 2](./TaiwanLicensePlate/YOLO/Segement/V5_test1_seg_1280/train/val_batch1_pred.jpg)
+
+---
+
 ## 技術文件
 關於自動化抽樣流水線的深入技術細節，請參閱：
-- [流水線技術細節 (中文)](./negative_clean/PIPELINE_DETAILS_zh.md)
-- [Pipeline Technical Details (English)](./negative_clean/PIPELINE_DETAILS_en.md)
+- [流水線技術細節 (中文)](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)
+- [Pipeline Technical Details (English)](./Tools/sampling/detail/SAMPLING_DETAILS_en.md)
 
 ---
 ##
