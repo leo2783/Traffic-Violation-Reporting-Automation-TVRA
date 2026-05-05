@@ -4,7 +4,47 @@ import logging
 from pathlib import Path
 from embedding import ImageDeduplicator
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+class DeduplicationService:
+    """去重流程服務類別"""
+    def __init__(self, threshold: float, yolo_weights: str = None):
+        self._deduplicator = ImageDeduplicator(threshold=threshold, yolo_weights=yolo_weights)
+        
+    def execute(self, input_folder: Path, output_folder: Path, use_confidence: bool) -> None:
+        if not input_folder.exists() or not input_folder.is_dir():
+            logger.error(f"輸入資料夾不存在或無效: {input_folder}")
+            return
+
+        # 讀取並替換路徑斜線
+        file_list = [str(f.resolve()).replace("\\", "/") for f in input_folder.iterdir() if f.is_file()]
+        
+        if not file_list:
+            logger.warning("輸入資料夾內沒有檔案")
+            return
+
+        # 執行去重邏輯
+        logger.info("開始執行圖片去重分析...")
+        final_files = self._deduplicator.process_batch(
+            file_list, 
+            use_confidence=use_confidence, 
+            sample_way="negative"
+        )
+
+        logger.info(f"原始圖片數量: {len(file_list)}")
+        logger.info(f"去重後保留數量: {len(final_files)}")
+        logger.info("-" * 30)
+
+        # 建立新資料夾並寫入圖片
+        output_folder.mkdir(parents=True, exist_ok=True)
+        logger.info(f"準備將圖片複製到: {output_folder}")
+
+        for file_path in final_files:
+            file_name = Path(file_path).name 
+            dest_path = output_folder / file_name 
+            shutil.copy(file_path, dest_path)
+
+        logger.info("所有乾淨圖片已成功寫入新資料夾！")
 
 def main():
     parser = argparse.ArgumentParser(description="圖片去重分析工具")
@@ -16,43 +56,15 @@ def main():
     
     args = parser.parse_args()
 
-    input_folder = Path(args.input_folder)
-    output_folder = Path(args.output_folder)
+    # 設定全域 Logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    if not input_folder.exists():
-        logging.error(f"輸入資料夾不存在: {input_folder}")
-        return
-
-    # 讀取並替換路徑斜線
-    file_list = [str(f.resolve()).replace("\\", "/") for f in input_folder.iterdir() if f.is_file()]
-    
-    if not file_list:
-        logging.warning("輸入資料夾內沒有檔案")
-        return
-
-    # 執行去重邏輯
-    logging.info("開始執行圖片去重分析...")
-    deduplicator = ImageDeduplicator(threshold=args.threshold, yolo_weights=args.yolo_weights)
-    final_files = deduplicator.process_batch(
-        file_list, 
-        use_confidence=args.use_confidence, 
-        sample_way="negative"
+    service = DeduplicationService(threshold=args.threshold, yolo_weights=args.yolo_weights)
+    service.execute(
+        input_folder=Path(args.input_folder),
+        output_folder=Path(args.output_folder),
+        use_confidence=args.use_confidence
     )
-
-    logging.info(f"原始圖片數量: {len(file_list)}")
-    logging.info(f"去重後保留數量: {len(final_files)}")
-    logging.info("-" * 30)
-
-    # 建立新資料夾並寫入圖片
-    output_folder.mkdir(parents=True, exist_ok=True)
-    logging.info(f"準備將圖片複製到: {output_folder}")
-
-    for file_path in final_files:
-        file_name = Path(file_path).name 
-        dest_path = output_folder / file_name 
-        shutil.copy(file_path, dest_path)
-
-    logging.info("所有乾淨圖片已成功寫入新資料夾！")
 
 if __name__ == "__main__":
     main()
