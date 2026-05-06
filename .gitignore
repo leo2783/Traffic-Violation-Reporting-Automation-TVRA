@@ -91,6 +91,7 @@ huggleface.py
 protocl.py
 Requriement.md
 task.md
+/Tools/sampling/gui.py
 
 # ==========================================
 # 6. 其他 (Testing, Logs, Docs, etc.)
