@@ -4,6 +4,23 @@ This document details the development journey of this project, including model v
 
 ---
 
+## 2026-05-06
+**Multi-version Model Evaluation and Documentation Maintenance**
+- **Model Version Review**: Organized and compared 5 model variants (V4, V5-960-R1, V5-960-R2, V5-1280, V5-1280-Seg).
+- **Segmentation Results**: Confirmed that **YOLO V5 (1280) Seg** currently delivers the best localization quality, achieving **90.02% mAP50-95**.
+- **Documentation Maintenance**: Updated `TaiwanLicensePlate/README.md` with the latest performance comparison table and model-selection conclusions.
+- **Sampling Module Refactor**: Refactored the Sampling module and introduced a GUI-based workflow workbench; some features still require further validation.
+- **Polygon Annotation Issue**: Confirmed polygon-labeling problems and tracked them under Issue #2 discussion notes.
+
+**Open-source Project Internationalization and CI/CD Setup**
+- **Template Internationalization**: Converted issue templates, PR templates, contribution guide, and code of conduct resources into English to improve the project’s international open-source readiness.
+- **Automation Checks Added**:
+  - Added `pr-lint.yml` to validate semantic pull-request titles via GitHub Actions.
+  - Added `python-ci.yml` for lightweight Python syntax/style checks using flake8, configured as non-blocking with `--exit-zero`.
+  - Added `dependabot.yml` to automate dependency update monitoring for GitHub Actions and pip packages.
+
+---
+
 ## 2026-05-04 to 2026-05-05
 **Multi-resolution Model Training and Labeling Issue Resolution**
 - **Multi-resolution Model Training**: Conducted training tests with different resolutions using different hardware:
