@@ -3,12 +3,24 @@
 這份文件詳細記錄了本專案的開發歷程、模型版本演進、資料處理細節以及遭遇的技術挑戰與解決方案。
 
 ---
+## 2026-05-06
+**多版本模型效能評估與文件更新**
+- **模型版本整理**：全面整理並比較了 5 個版本的模型（V4, V5-960-R1, V5-960-R2, V5-1280, V5-1280-Seg）。
+- **語意分割 (Segmentation) 成果**：確認 **YOLO V5 (1280) Seg** 模型在 `mAP50-95` 指標上達到 **90.02%**，大幅優於傳統偵測模型，成為目前定位最準確的版本。
+- **文件維護**：更新 `TaiwanLicensePlate/README.md`，同步最新的效能對照表與分析結論，為後續模型選型提供數據支撐。
+
+**GitHub 專案開源配置國際化與自動化 CI/CD 導入**
+- **模板英文化**：將所有的 Issue 模板、PR 模板、貢獻指南與行為守則 (CODE_OF_CONDUCT) 等轉換為英文，提升專案的國際化開源標準。
+- **自動化檢查導入**：
+  - 新增 `pr-lint.yml` 透過 GitHub Actions 自動檢查 PR 標題是否符合語義化格式 (Semantic Commits)。
+  - 新增 `python-ci.yml` 提供輕量的 Python 程式碼語法檢查 (flake8)，設定為僅提示不阻擋合併 (`--exit-zero`) 以降低開發阻力。
+  - 新增 `dependabot.yml` 啟動自動化依賴套件管理，定期檢查 GitHub Actions 和 Pip 套件的更新。
+
 ## 2026-05-05 (晚上)
 **驗證集清洗工具與測試組件重構**
 - **工具重構**：接手並重構了驗證集清洗工具 `val_clean.py` 與統一測試工具 `test_runner.py`。
 - **架構優化**：全面導入 `YoloAnalyzer` 封裝，實現批次 GPU 推論與 `stream=True` 記憶體優化，顯著提升效能並統一了推論介面。
 - **標準化實施**：落實專案 OOP 規範、型別提示 (Type Hints) 與 Logging 機制，移除不規範的臨時腳本 (`Tools/s`)。
-- **教育訓練**：撰寫 `deepseek_skills.md` 針對前任 AI 助手的不足之處提供技術指引。
 
 ## 2026-05-04 到 2026-05-05
 **多解析度模型訓練與標註問題排除**
@@ -19,7 +31,7 @@
 
 ## 2026-05-01 到 2026-05-03
 **自動化去重篩選機制 (Sampling) 實作**
-- **高維度特徵萃取與去重**：開發 `sampling` 模組，導入 MobileNetV3 將圖片轉換為高維度特徵向量 (Embedding)。為追求極速運算，利用 PyTorch 在 GPU 上進行張量矩陣運算，計算餘弦相似度 (Cosine Similarity) 矩陣來精準過濾重複畫面。詳細技術實作與演算法流程圖請參閱：[Sampling 模組技術實現細節](./sampling/detail/SAMPLING_DETAILS_zh.md)。
+- **高維度特徵萃取與去重**：開發 `sampling` 模組，導入 MobileNetV3 將圖片轉換為高維度特徵向量 (Embedding)。為追求極速運算，利用 PyTorch 在 GPU 上進行張量矩陣運算，計算餘弦相似度 (Cosine Similarity) 矩陣來精準過濾重複畫面。詳細技術實作與演算法流程圖請參閱：[Sampling 模組技術實現細節](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)。
 - **多重篩選策略**：捨棄了原定的 K-Means 分群計畫，改為導入**標註框數量 (Box counts) 比對**與 **YOLO 信心度排序**。系統僅在標註框數量相同且特徵相似度達標時才判定為重複，確保了資料清洗的嚴謹性與高品質。
 - **資料清洗與 Dataset 整理**：去重演算法與清洗流程設計持續進行至 5 月 3 日，Dataset 已於同日全面整理完畢。
 - **未來可能實作 (Future Work)**：

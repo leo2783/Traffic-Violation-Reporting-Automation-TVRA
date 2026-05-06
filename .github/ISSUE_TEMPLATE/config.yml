@@ -1,0 +1,84 @@
+# Issue Reporting and Proposal Template Configuration
+
+## Template List
+
+blank:
+  # Blank template (no default format used)
+
+bug_report:
+  description: Report a bug or unexpected behavior
+  label: Bug
+  template: bug_report.md
+
+feature_request:
+  description: Propose a new feature or improvement to an existing one
+  label: Feature
+  template: feature_request.md
+
+question:
+  description: Ask a question about the project
+  label: Question
+  template: question.md
+
+## Default Label Configuration
+
+labels:
+  - name: Bug
+    color: d73a4a
+    description: Indicates a bug or unexpected behavior
+
+  - name: Feature
+    color: a2eeef
+    description: Indicates a new feature request
+
+  - name: Question
+    color: d876e3
+    description: Indicates a question needing further clarification
+
+  - name: Documentation
+    color: 0075ca
+    description: Indicates documentation updates
+
+  - name: Enhancement
+    color: 84b6eb
+    description: Indicates a functional improvement
+
+  - name: Help Wanted
+    color: 008672
+    description: Indicates community help is needed
+
+  - name: Good First Issue
+    color: 7057ff
+    description: Indicates a good introductory issue for beginners
+
+  - name: Testing
+    color: de7eb9
+    description: Indicates testing-related tasks
+
+  - name: Priority
+    color: b60205
+    description: High priority issue
+
+  - name: Low Priority
+    color: 0e8a16
+    description: Low priority issue
+
+  - name: Performance
+    color: fc6532
+    description: Performance-related issue
+
+  - name: AI/ML
+    color: 00ccff
+    description: Artificial Intelligence / Machine Learning related
+
+  - name: YOLO
+    color: ff6b35
+    description: YOLO model related
+
+  - name: OCR
+    color: 7ec699
+    description: OCR license plate recognition related
+
+  - name: Automation
+    color: ffd700
+    description: Automation process related

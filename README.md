@@ -57,19 +57,33 @@
 
 ---
 
+## 初步成果展示
+以下為 YOLO 語意分割模型 (Segmentation) 在測試集上自動生成的預測結果，可精準定位車牌與違規特徵：
+
+![初步成果展示 1](./TaiwanLicensePlate/YOLO/Segement/V5_test1_seg_1280/train/val_batch0_pred.jpg)
+![初步成果展示 2](./TaiwanLicensePlate/YOLO/Segement/V5_test1_seg_1280/train/val_batch1_pred.jpg)
+
+---
+
 ## 技術文件
 關於自動化抽樣流水線的深入技術細節，請參閱：
-- [流水線技術細節 (中文)](./negative_clean/PIPELINE_DETAILS_zh.md)
-- [Pipeline Technical Details (English)](./negative_clean/PIPELINE_DETAILS_en.md)
+- [技術細節 (中文)](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)
+- [Pipeline Technical Details (English)](./Tools/sampling/detail/SAMPLING_DETAILS_en.md)
 
 ---
 ##
 - 目前進度：有version 5，正在測試不同的dataset對於模型表現的影響。
-- 下個階段：把框找出來後使用OpenCV實作OCR。
+- 下個階段：把框找出來後使用OpenCV+Paddle+OCR實作OCR。
 
 ## 開發日誌
 
 開發過程的詳細紀錄、模型版本演進與遭遇的技術挑戰，請參閱獨立的 [開發日誌 (DEVELOPMENT_LOG.md)](./DEVELOPMENT_LOG.md)。
+
+---
+
+## 授權條款 (License)
+
+本專案採用 GNU Affero General Public License v3.0 (AGPL-3.0) 授權。詳細授權條款請參見 [.github/license.md](.github/license.md)。
 
 ---
 
@@ -78,4 +92,6 @@
 本專案僅供開發研究使用，使用者應遵守當地法律法規，嚴禁用於惡意騷擾或非法用途。
 
 ## 如何貢獻
-歡迎各路大神一起參與本專案，如果有任何疑問，contact me email：qet6322076690@gmail.com
+歡迎各路大神一起參與本專案！詳細的貢獻流程、程式碼規範與 PR 提交方式，請參閱我們的 [貢獻指南 (CONTRIBUTING.md)](.github/CONTRIBUTING.md)。
+
+如果有任何疑問，歡迎隨時透過 Email 聯繫：qet6322076690@gmail.com
