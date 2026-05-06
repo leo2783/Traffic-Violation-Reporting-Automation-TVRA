@@ -16,6 +16,13 @@
   - 新增 `python-ci.yml` 提供輕量的 Python 程式碼語法檢查 (flake8)，設定為僅提示不阻擋合併 (`--exit-zero`) 以降低開發阻力。
   - 新增 `dependabot.yml` 啟動自動化依賴套件管理，定期檢查 GitHub Actions 和 Pip 套件的更新。
 
+**Sampling 資料工程工作台更新**
+- **多分頁 GUI Workbench**：`Tools/sampling/gui.py` 維持圖片去重、負樣本抽樣、驗證集清洗、YOLO 測試與 Auto Label 等分頁，並修正 Qt logging bridge，將 `GUILogHandler` 與 `LogEmitter` 分離，避免應用程式關閉時 logging handler 持有已銷毀 QObject 的問題。
+- **Service Layer 與常數集中化**：新增/維護 `Tools/sampling/services.py` 與 `Tools/sampling/constants.py`，集中處理 GUI/CLI 共用 workflow、圖片/影片副檔名與檔案蒐集邏輯。
+- **Auto Label Workflow 補齊**：更新 `Tools/sampling/auto_label.py`，提供 `DetectionBox`、`AutoLabelCandidate`、`AutoLabelSelector`、`AutoLabelWorkflow` 與圖片/YOLO txt/AnyLabel JSON writers，讓 GUI 的 Auto Label tab 與 `AutoLabelService` 實際可用。
+- **Import 相容性**：調整 sampling 模組內部 imports，使 `python -m Tools.sampling.gui` 與 `python Tools/sampling/gui.py` 兩種啟動方式都能對齊目前架構。
+- **文件同步**：重寫 `Tools/sampling/detail/SAMPLING_DETAILS_zh.md` 並同步 `SAMPLING_DETAILS_en.md`、README 與開發日誌，移除舊版 K-Means/Top-K Auto Label 描述，改以 YOLO 高信心候選 + embedding similarity 去重 + 多格式輸出作為最新版說明。
+
 ## 2026-05-05 (晚上)
 **驗證集清洗工具與測試組件重構**
 - **工具重構**：接手並重構了驗證集清洗工具 `val_clean.py` 與統一測試工具 `test_runner.py`。

@@ -13,7 +13,10 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 
 
-from interfaces import BaseDataset
+try:
+    from .interfaces import BaseDataset
+except ImportError:
+    from interfaces import BaseDataset
 from typing import List
 
 class YoutubeDataset(BaseDataset):

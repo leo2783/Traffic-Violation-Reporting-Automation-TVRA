@@ -3,7 +3,10 @@ import argparse
 import logging
 from pathlib import Path
 from typing import Optional, Callable
-from embedding import ImageDeduplicator
+try:
+    from .embedding import ImageDeduplicator
+except ImportError:
+    from embedding import ImageDeduplicator
 
 logger = logging.getLogger(__name__)
 

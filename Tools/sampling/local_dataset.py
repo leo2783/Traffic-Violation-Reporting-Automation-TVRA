@@ -7,7 +7,10 @@ Responsible for scanning video or image files in a specified path.
 import os
 
 
-from interfaces import BaseDataset
+try:
+    from .interfaces import BaseDataset
+except ImportError:
+    from interfaces import BaseDataset
 from typing import List
 
 class LocalDataset(BaseDataset):

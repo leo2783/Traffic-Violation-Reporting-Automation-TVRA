@@ -4,7 +4,10 @@ import numpy as np
 import logging
 import umap
 import hdbscan
-from utils import FeatureExtractor, YoloAnalyzer, path_check
+try:
+    from .utils import FeatureExtractor, YoloAnalyzer, path_check
+except ImportError:
+    from utils import FeatureExtractor, YoloAnalyzer, path_check
 
 class NegativeSampler:
     """

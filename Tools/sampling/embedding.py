@@ -7,7 +7,10 @@ import logging
 from collections import defaultdict
 from pathlib import Path
 from typing import List, Optional, Callable
-from utils import FeatureExtractor, YoloAnalyzer, path_check, get_device
+try:
+    from .utils import FeatureExtractor, YoloAnalyzer, path_check, get_device
+except ImportError:
+    from utils import FeatureExtractor, YoloAnalyzer, path_check, get_device
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,11 @@ This document details the development journey of this project, including model v
 - **Model Version Review**: Organized and compared 5 model variants (V4, V5-960-R1, V5-960-R2, V5-1280, V5-1280-Seg).
 - **Segmentation Results**: Confirmed that **YOLO V5 (1280) Seg** currently delivers the best localization quality, achieving **90.02% mAP50-95**.
 - **Documentation Maintenance**: Updated `TaiwanLicensePlate/README.md` with the latest performance comparison table and model-selection conclusions.
-- **Sampling Module Refactor**: Refactored the Sampling module and introduced a GUI-based workflow workbench; some features still require further validation.
+- **Sampling Data-Engineering Workbench Update**: Kept `Tools/sampling/gui.py` aligned with the multi-tab workbench for image deduplication, negative sampling, validation cleaning, YOLO testing, and Auto Label. The Qt logging bridge was refactored by separating `GUILogHandler` from `LogEmitter` to avoid shutdown errors caused by handlers retaining destroyed QObject instances.
+- **Service Layer and Constants**: Added/maintained `Tools/sampling/services.py` and `Tools/sampling/constants.py` for shared GUI/CLI workflows, supported extension lists, and file collection helpers.
+- **Auto Label Workflow Restored**: Updated `Tools/sampling/auto_label.py` with `DetectionBox`, `AutoLabelCandidate`, `AutoLabelSelector`, `AutoLabelWorkflow`, and image / YOLO txt / AnyLabel JSON writers so the GUI Auto Label tab and `AutoLabelService` match the actual implementation.
+- **Import Compatibility**: Adjusted internal sampling imports so both `python -m Tools.sampling.gui` and `python Tools/sampling/gui.py` execution modes remain compatible.
+- **Documentation Synchronization**: Rebuilt `Tools/sampling/detail/SAMPLING_DETAILS_zh.md` and synchronized `SAMPLING_DETAILS_en.md`, README, and development logs. The outdated K-Means / Top-K Auto Label description has been replaced with the current YOLO high-confidence candidate + embedding-similarity deduplication + multi-format export workflow.
 - **Polygon Annotation Issue**: Confirmed polygon-labeling problems and tracked them under Issue #2 discussion notes.
 
 **Open-source Project Internationalization and CI/CD Setup**

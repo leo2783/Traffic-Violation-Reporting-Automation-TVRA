@@ -9,7 +9,10 @@ import torchvision.transforms as transforms
 from torchvision import models
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from interfaces import FeatureExtractorInterface, ObjectDetectorInterface
+try:
+    from .interfaces import FeatureExtractorInterface, ObjectDetectorInterface
+except ImportError:
+    from interfaces import FeatureExtractorInterface, ObjectDetectorInterface
 
 logger = logging.getLogger(__name__)
 

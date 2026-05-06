@@ -48,17 +48,21 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class GUILogHandler(logging.Handler, QObject):
-    """Forward Python logging records to a Qt signal."""
+class LogEmitter(QObject):
+    """Qt signal bridge for GUI log messages."""
 
     log_signal = pyqtSignal(str)
 
-    def __init__(self) -> None:
-        logging.Handler.__init__(self)
-        QObject.__init__(self)
+
+class GUILogHandler(logging.Handler):
+    """Forward Python logging records to a Qt signal emitter."""
+
+    def __init__(self, emitter: LogEmitter) -> None:
+        super().__init__()
+        self._emitter = emitter
 
     def emit(self, record: logging.LogRecord) -> None:
-        self.log_signal.emit(self.format(record))
+        self._emitter.log_signal.emit(self.format(record))
 
 
 class TaskWorker(QThread):
@@ -96,6 +100,7 @@ class SamplingGUI(QMainWindow):
         super().__init__()
         self.worker: TaskWorker | None = None
         self.run_buttons: list[QPushButton] = []
+        self._logging_cleaned_up = False
 
         self.setWindowTitle("TVRA Sampling Tool - 資料工程工作台")
         self.setMinimumSize(960, 760)
@@ -414,15 +419,44 @@ class SamplingGUI(QMainWindow):
             target.setText(path)
 
     def setup_logging(self) -> None:
-        self.log_handler = GUILogHandler()
+        self.log_emitter = LogEmitter()
+        self.log_handler = GUILogHandler(self.log_emitter)
         self.log_handler.setFormatter(
             logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         )
-        self.log_handler.log_signal.connect(self.append_log)
+        self.log_emitter.log_signal.connect(self.append_log)
 
         root_logger = logging.getLogger()
         root_logger.addHandler(self.log_handler)
         root_logger.setLevel(logging.INFO)
+
+        app = QApplication.instance()
+        if app is not None:
+            app.aboutToQuit.connect(self.cleanup_logging)
+
+    def cleanup_logging(self) -> None:
+        """Safely detach Qt-backed logging handler exactly once."""
+
+        if self._logging_cleaned_up:
+            return
+        self._logging_cleaned_up = True
+
+        root_logger = logging.getLogger()
+        if hasattr(self, "log_handler"):
+            try:
+                root_logger.removeHandler(self.log_handler)
+            except Exception:  # noqa: BLE001 - shutdown path must stay resilient.
+                pass
+            try:
+                self.log_handler.close()
+            except Exception:  # noqa: BLE001 - shutdown path must stay resilient.
+                pass
+
+    def closeEvent(self, event) -> None:  # type: ignore[override]
+        """Detach Qt-backed logging handler before QWidget teardown."""
+
+        self.cleanup_logging()
+        super().closeEvent(event)
 
     def append_log(self, message: str) -> None:
         self.log_text.append(message)

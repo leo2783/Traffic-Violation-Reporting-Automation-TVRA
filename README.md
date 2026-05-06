@@ -53,7 +53,7 @@
 | 影像處理 | OpenCV, YOLO (v26), PyTorch / TensorFlow |
 | OCR | PaddleOCR  |
 | 自動化 | Selenium / Playwright (網頁表單填充) |
-| 資料處理 | Pandas, ,自行開發的小工具(FileCompareTool),numpy,HDBSCAN,UMAP |
+| 資料處理 | Pandas, NumPy, FileCompareTool, Sampling, HDBSCAN, UMAP |
 
 ---
 
@@ -66,15 +66,16 @@
 ---
 
 ## 技術文件
-關於自動化抽樣流水線的深入技術細節，請參閱：
+關於自動化抽樣與資料工程工作台的深入技術細節，請參閱：
 - [技術細節 (中文)](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)
 - [Pipeline Technical Details (English)](./Tools/sampling/detail/SAMPLING_DETAILS_en.md)
 
 目前 `Tools/sampling/` 已不只是單一去重腳本，而是資料工程工作台，包含：
 - 多分頁 GUI workbench
 - 共用 service layer
-- Auto Label workflow
+- Auto Label workflow（YOLO 高信心候選 + embedding similarity 去重）
 - YOLO `.txt` / AnyLabel `.json` 多格式標註輸出
+- package / script 兩種啟動方式的 import 相容性
 
 ---
 ##

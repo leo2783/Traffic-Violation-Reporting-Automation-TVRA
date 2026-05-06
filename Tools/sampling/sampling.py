@@ -1,6 +1,9 @@
 import argparse
 import logging
-from extract_negative import NegativeSampler
+try:
+    from .extract_negative import NegativeSampler
+except ImportError:
+    from extract_negative import NegativeSampler
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
