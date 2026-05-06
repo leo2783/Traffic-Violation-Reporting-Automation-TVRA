@@ -7,8 +7,14 @@ Responsible for scanning video or image files in a specified path.
 import os
 
 
-from interfaces import BaseDataset
 from typing import List
+
+try:
+    from .constants import SUPPORTED_IMAGE_EXTENSIONS, SUPPORTED_VIDEO_EXTENSIONS
+    from .interfaces import BaseDataset
+except ImportError:
+    from constants import SUPPORTED_IMAGE_EXTENSIONS, SUPPORTED_VIDEO_EXTENSIONS
+    from interfaces import BaseDataset
 
 class LocalDataset(BaseDataset):
     """
@@ -36,7 +42,7 @@ class LocalDataset(BaseDataset):
         掃描資料夾內支援的格式。
         :return: List of file paths
         """
-        supported_formats = ('.mp4', '.avi', '.mov', '.ts', '.jpg', '.jpeg', '.png')
+        supported_formats = tuple(SUPPORTED_VIDEO_EXTENSIONS | SUPPORTED_IMAGE_EXTENSIONS)
         sources = []
         if os.path.exists(self._directory):
             for f in os.listdir(self._directory):

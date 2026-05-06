@@ -10,7 +10,12 @@ import os
 import cv2
 from pathlib import Path
 
-from utils import YoloAnalyzer, path_check
+try:
+    from .constants import SUPPORTED_VIDEO_EXTENSIONS
+    from .utils import YoloAnalyzer, path_check
+except ImportError:
+    from constants import SUPPORTED_VIDEO_EXTENSIONS
+    from utils import YoloAnalyzer, path_check
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +31,7 @@ class UnifiedTestRunner:
     def test_video_folder(self, folder_path: str, output: str = None) -> None:
         """測試本地影片資料夾"""
         folder = Path(folder_path)
-        video_extensions = ('.mp4', '.avi', '.mov', '.ts')
+        video_extensions = tuple(SUPPORTED_VIDEO_EXTENSIONS)
         video_files = [f for f in folder.iterdir() if f.suffix.lower() in video_extensions]
         
         if not video_files:
@@ -83,7 +88,7 @@ class UnifiedTestRunner:
         
         logger.info(f"正在處理單一檔案: {path.name}")
         
-        is_video = path.suffix.lower() in ('.mp4', '.avi', '.mov', '.ts')
+        is_video = path.suffix.lower() in SUPPORTED_VIDEO_EXTENSIONS
         
         results = self._analyzer.predict(
             source=str(path),

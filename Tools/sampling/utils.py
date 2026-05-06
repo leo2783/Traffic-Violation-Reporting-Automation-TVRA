@@ -9,7 +9,12 @@ import torchvision.transforms as transforms
 from torchvision import models
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from interfaces import FeatureExtractorInterface, ObjectDetectorInterface
+try:
+    from .constants import is_supported_image_file
+    from .interfaces import FeatureExtractorInterface, ObjectDetectorInterface
+except ImportError:
+    from constants import is_supported_image_file
+    from interfaces import FeatureExtractorInterface, ObjectDetectorInterface
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +183,4 @@ class YoloAnalyzer(ObjectDetectorInterface):
 
 def path_check(path: str) -> bool:
     """檢查路徑是否為支援的圖片格式"""
-    supported_formats = ('.jpg', '.jpeg', '.png', '.bmp')
-    if os.path.exists(path):
-        return path.lower().endswith(supported_formats)
-    return False
+    return is_supported_image_file(path)

@@ -1,7 +1,11 @@
 import argparse
 import logging
-from extract_negative import NegativeSampler
 from pathlib import Path
+
+try:
+    from .services import NegativeSamplingService
+except ImportError:
+    from services import NegativeSamplingService
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -15,25 +19,14 @@ def main():
     
     args = parser.parse_args()
 
-    input_folder = Path(args.input_folder)
-    output_folder = args.output_folder
-
-    if not input_folder.exists():
-        logging.error(f"輸入資料夾不存在: {input_folder}")
-        return
-
-    # 讀取並替換路徑斜線
-    file_list = [str(f.resolve()).replace("\\", "/") for f in input_folder.iterdir() if f.is_file()]
-    
-    if not file_list:
-        logging.warning("輸入資料夾內沒有檔案")
-        return
-
-    sampler = NegativeSampler(yolo_weights=args.yolo_weights, temperature=args.temperature)
-    final_paths = sampler.sample(
-        image_paths=file_list, 
-        num_samples=args.num_samples, 
-        output_dir=output_folder
+    service = NegativeSamplingService(
+        yolo_weights=args.yolo_weights,
+        temperature=args.temperature,
+    )
+    final_paths = service.execute(
+        input_folder=Path(args.input_folder),
+        output_folder=Path(args.output_folder),
+        num_samples=args.num_samples,
     )
     
     logging.info(f"抽樣完成，共獲得 {len(final_paths)} 張圖片。")

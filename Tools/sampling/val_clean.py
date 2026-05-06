@@ -4,7 +4,10 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from utils import YoloAnalyzer, path_check
+try:
+    from .utils import YoloAnalyzer, path_check
+except ImportError:
+    from utils import YoloAnalyzer, path_check
 
 logger = logging.getLogger(__name__)
 
