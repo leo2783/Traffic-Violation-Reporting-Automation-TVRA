@@ -311,14 +311,69 @@ class SamplingGUI(QMainWindow):
     def create_auto_label_tab(self) -> QWidget:
         tab = QWidget()
         layout = QVBoxLayout(tab)
-        message = QLabel(
-            "Auto-label 分群目前保留為 Phase 2。\n\n"
-            "原因：auto_label.py 需要 candidates（path / txt_path / name / max_conf）資料結構，"
-            "但目前尚未定義 GUI 的候選資料來源。\n\n"
-            "建議下一階段加入 JSON/CSV candidates 載入或與 YOLO 推論結果串接後再啟用。"
+
+        path_group = QGroupBox("路徑設定")
+        path_layout = QVBoxLayout(path_group)
+        self.autolabel_input_edit = self.add_path_row(path_layout, "輸入圖片資料夾:", "folder")
+        self.autolabel_output_edit = self.add_path_row(path_layout, "輸出資料夾:", "folder")
+        self.autolabel_yolo_edit = self.add_path_row(
+            path_layout,
+            "YOLO 權重路徑:",
+            "file",
+            "Weights (*.pt *.engine);;All Files (*)",
         )
-        message.setWordWrap(True)
-        layout.addWidget(message)
+        layout.addWidget(path_group)
+
+        param_group = QGroupBox("標註參數")
+        param_layout = QHBoxLayout(param_group)
+        
+        param_layout.addWidget(QLabel("信心度閾值:"))
+        self.autolabel_conf_spin = QDoubleSpinBox()
+        self.autolabel_conf_spin.setRange(0.0, 1.0)
+        self.autolabel_conf_spin.setSingleStep(0.05)
+        self.autolabel_conf_spin.setValue(0.80)
+        param_layout.addWidget(self.autolabel_conf_spin)
+
+        param_layout.addWidget(QLabel("相似度閾值:"))
+        self.autolabel_sim_spin = QDoubleSpinBox()
+        self.autolabel_sim_spin.setRange(0.0, 1.0)
+        self.autolabel_sim_spin.setSingleStep(0.05)
+        self.autolabel_sim_spin.setValue(0.90)
+        param_layout.addWidget(self.autolabel_sim_spin)
+        
+        layout.addWidget(param_group)
+
+        output_group = QGroupBox("輸出選項")
+        output_layout = QHBoxLayout(output_group)
+        
+        self.autolabel_copy_images_check = QCheckBox("複製圖片")
+        self.autolabel_copy_images_check.setChecked(True)
+        output_layout.addWidget(self.autolabel_copy_images_check)
+
+        self.autolabel_output_yolo_check = QCheckBox("輸出 YOLO txt")
+        self.autolabel_output_yolo_check.setChecked(False)
+        output_layout.addWidget(self.autolabel_output_yolo_check)
+
+        self.autolabel_output_json_check = QCheckBox("輸出 AnyLabel JSON")
+        self.autolabel_output_json_check.setChecked(False)
+        output_layout.addWidget(self.autolabel_output_json_check)
+
+        self.autolabel_keep_conf_check = QCheckBox("YOLO txt 保留信心度")
+        self.autolabel_keep_conf_check.setChecked(False)
+        self.autolabel_keep_conf_check.setEnabled(False)
+        
+        # 連動 YOLO txt 勾選狀態與保留信心度的可用性
+        self.autolabel_output_yolo_check.stateChanged.connect(
+            lambda state: self.autolabel_keep_conf_check.setEnabled(state == Qt.CheckState.Checked.value)
+        )
+        output_layout.addWidget(self.autolabel_keep_conf_check)
+        
+        layout.addWidget(output_group)
+
+        run_button = QPushButton("開始執行 Auto Label")
+        run_button.clicked.connect(self.start_auto_label)
+        self.register_run_button(run_button)
+        layout.addWidget(run_button)
         layout.addStretch()
         return tab
 
@@ -497,6 +552,46 @@ class SamplingGUI(QMainWindow):
             )
 
         self.start_worker("YOLO 測試", task)
+
+    def start_auto_label(self) -> None:
+        if not self.validate_required_paths(
+            [
+                (self.autolabel_input_edit, "輸入圖片資料夾"),
+                (self.autolabel_output_edit, "輸出資料夾"),
+                (self.autolabel_yolo_edit, "YOLO 權重路徑"),
+            ]
+        ):
+            return
+            
+        if not (self.autolabel_copy_images_check.isChecked() or 
+                self.autolabel_output_yolo_check.isChecked() or 
+                self.autolabel_output_json_check.isChecked()):
+            QMessageBox.warning(self, "警告", "至少需要選擇一種輸出（圖片、YOLO txt 或 AnyLabel JSON）！")
+            return
+
+        def task() -> list[object]:
+            # 動態載入避免啟動過慢
+            try:
+                from .services import AutoLabelService
+            except ImportError:
+                from services import AutoLabelService
+                
+            service = AutoLabelService(
+                yolo_weights=self.autolabel_yolo_edit.text().strip(),
+                confidence_threshold=float(self.autolabel_conf_spin.value()),
+                similarity_threshold=float(self.autolabel_sim_spin.value()),
+            )
+            return service.execute(
+                input_folder=Path(self.autolabel_input_edit.text().strip()),
+                output_folder=Path(self.autolabel_output_edit.text().strip()),
+                copy_images=self.autolabel_copy_images_check.isChecked(),
+                output_yolo_txt=self.autolabel_output_yolo_check.isChecked(),
+                output_anylabel_json=self.autolabel_output_json_check.isChecked(),
+                keep_confidence=self.autolabel_keep_conf_check.isChecked(),
+                progress_callback=self.worker.emit_progress if self.worker else None,
+            )
+
+        self.start_worker("Auto Label", task)
 
     def on_progress(self, current: int, total: int) -> None:
         if total <= 0:
