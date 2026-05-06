@@ -70,6 +70,12 @@ For in-depth technical details regarding our automated sampling pipeline, please
 - [Pipeline Technical Details (English)](./Tools/sampling/detail/SAMPLING_DETAILS_en.md)
 - [Pipeline Technical Details (Chinese)](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)
 
+The `Tools/sampling/` directory now functions as a broader data-engineering workbench, including:
+- a multi-tab GUI workbench
+- a shared service layer
+- an Auto Label workflow
+- multi-format annotation export for YOLO `.txt` and AnyLabel `.json`
+
 ---
 
 ## Current Progress

@@ -70,6 +70,12 @@
 - [技術細節 (中文)](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)
 - [Pipeline Technical Details (English)](./Tools/sampling/detail/SAMPLING_DETAILS_en.md)
 
+目前 `Tools/sampling/` 已不只是單一去重腳本，而是資料工程工作台，包含：
+- 多分頁 GUI workbench
+- 共用 service layer
+- Auto Label workflow
+- YOLO `.txt` / AnyLabel `.json` 多格式標註輸出
+
 ---
 ##
 - 目前進度：有version 5，正在測試不同的dataset對於模型表現的影響。
