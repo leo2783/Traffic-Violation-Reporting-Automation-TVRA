@@ -81,9 +81,17 @@
 
 ---
 
+## 授權條款 (License)
+
+本專案採用 GNU Affero General Public License v3.0 (AGPL-3.0) 授權。詳細授權條款請參見 [.github/license.md](.github/license.md)。
+
+---
+
 ## 免責聲明
 
 本專案僅供開發研究使用，使用者應遵守當地法律法規，嚴禁用於惡意騷擾或非法用途。
 
 ## 如何貢獻
-歡迎各路大神一起參與本專案，如果有任何疑問，contact me email：qet6322076690@gmail.com
+歡迎各路大神一起參與本專案！詳細的貢獻流程、程式碼規範與 PR 提交方式，請參閱我們的 [貢獻指南 (CONTRIBUTING.md)](.github/CONTRIBUTING.md)。
+
+如果有任何疑問，歡迎隨時透過 Email 聯繫：qet6322076690@gmail.com

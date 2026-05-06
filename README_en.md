@@ -51,9 +51,9 @@ Enhance system compatibility and intelligence.
 |----------|------------|
 | Language | Python 3.12 |
 | Image Processing | OpenCV, YOLO (v26), PyTorch / TensorFlow |
-| OCR | PaddleOCR / Tesseract |
+| OCR | PaddleOCR |
 | Automation | Selenium / Playwright (for web form filling) |
-| Data Processing | Pandas, K-means, Custom Tools (FileCompareTool), NumPy |
+| Data Processing | Pandas, Custom Tools (FileCompareTool), NumPy, HDBSCAN, UMAP |
 
 ---
 
@@ -70,8 +70,20 @@ For in-depth technical details regarding our automated sampling pipeline, please
 - [Pipeline Technical Details (English)](./Tools/sampling/detail/SAMPLING_DETAILS_en.md)
 - [Pipeline Technical Details (Chinese)](./Tools/sampling/detail/SAMPLING_DETAILS_zh.md)
 
+---
+
+## Current Progress
+- **Current Status**: Reached version 5, currently testing the impact of different datasets on model performance.
+- **Next Phase**: After extracting bounding boxes, implement OCR using OpenCV + PaddleOCR.
+
 ## Development Log
 For detailed records of the development process, model version evolution, and technical challenges encountered, please refer to the standalone [Development Log (DEVELOPMENT_LOG_en.md)](./DEVELOPMENT_LOG_en.md).
+
+---
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). See [.github/license.md](.github/license.md) for the full license text.
 
 ---
 
@@ -79,4 +91,6 @@ For detailed records of the development process, model version evolution, and te
 This project is for research and development purposes only. Users must comply with local laws and regulations. Malicious harassment or illegal use is strictly prohibited.
 
 ## How to Contribute
-Contributions from developers of all levels are welcome. If you have any questions, please contact me via email: qet6322076690@gmail.com
+Contributions from developers of all levels are welcome! For detailed workflows, coding standards, and PR submission guidelines, please refer to our [Contributing Guide](.github/CONTRIBUTING.md).
+
+If you have any questions, please contact me via email: qet6322076690@gmail.com

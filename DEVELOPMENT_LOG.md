@@ -9,6 +9,13 @@
 - **語意分割 (Segmentation) 成果**：確認 **YOLO V5 (1280) Seg** 模型在 `mAP50-95` 指標上達到 **90.02%**，大幅優於傳統偵測模型，成為目前定位最準確的版本。
 - **文件維護**：更新 `TaiwanLicensePlate/README.md`，同步最新的效能對照表與分析結論，為後續模型選型提供數據支撐。
 
+**GitHub 專案開源配置國際化與自動化 CI/CD 導入**
+- **模板英文化**：將所有的 Issue 模板、PR 模板、貢獻指南與行為守則 (CODE_OF_CONDUCT) 等轉換為英文，提升專案的國際化開源標準。
+- **自動化檢查導入**：
+  - 新增 `pr-lint.yml` 透過 GitHub Actions 自動檢查 PR 標題是否符合語義化格式 (Semantic Commits)。
+  - 新增 `python-ci.yml` 提供輕量的 Python 程式碼語法檢查 (flake8)，設定為僅提示不阻擋合併 (`--exit-zero`) 以降低開發阻力。
+  - 新增 `dependabot.yml` 啟動自動化依賴套件管理，定期檢查 GitHub Actions 和 Pip 套件的更新。
+
 ## 2026-05-05 (晚上)
 **驗證集清洗工具與測試組件重構**
 - **工具重構**：接手並重構了驗證集清洗工具 `val_clean.py` 與統一測試工具 `test_runner.py`。

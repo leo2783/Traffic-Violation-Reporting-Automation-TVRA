@@ -1,0 +1,70 @@
+name: Stale
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at UTC 0:00 (Taipei time 08:00)
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Issue strategy
+          days-before-stale: 60
+          days-before-close: 14
+          
+          # Stale issue message
+          stale-issue-message: |
+            👋 Hello!
+
+            This is a friendly reminder: this Issue has been inactive for 60 days.
+
+            If you still need help with this, please let us know. If you have already resolved the issue, feel free to close it.
+
+            Thank you for your understanding!
+            
+          close-issue-message: |
+            🔒 This Issue has been closed because it has been inactive for a long time.
+
+            If you still need to discuss this topic, feel free to reopen it.
+
+          # PR strategy
+          days-before-pr-stale: 90
+          days-before-pr-close: 21
+          
+          stale-pr-message: |
+            👋 Hello!
+
+            This Pull Request has been inactive for 90 days.
+
+            If you are still actively working on this feature, please let us know. If your PR is ready to be merged, please update it.
+
+          close-pr-message: |
+            🔒 This Pull Request has been closed because it has been inactive for a long time.
+
+            If you wish to continue with this PR, feel free to reopen it.
+
+          # Exempt labels
+          exempt-issue-labels: 'pinned,security,enhancement'
+          exempt-pr-labels: 'pinned,security'
+          
+          # Exempt milestones
+          exempt-all-milestones: false
+          only-labels: ''
+          
+          # Actions labels
+          stale-label: 'stale'
+          remove-stale-when-updated: true
+          delete-branch: false
