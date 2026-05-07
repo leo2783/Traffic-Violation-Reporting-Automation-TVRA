@@ -53,7 +53,7 @@
 | 影像處理 | OpenCV, YOLO (v26), PyTorch / TensorFlow |
 | OCR | PaddleOCR  |
 | 自動化 | Selenium / Playwright (網頁表單填充) |
-| 資料處理 | Pandas, NumPy, FileCompareTool, Sampling, HDBSCAN, UMAP |
+| 資料處理 | Pandas, NumPy, FileCompareTool, Sampling, HDBSCAN, UMAP, C++ Hash Accelerator (optional) |
 
 ---
 
@@ -76,6 +76,8 @@
 - Auto Label workflow（YOLO 高信心候選 + embedding similarity 去重）
 - YOLO `.txt` / AnyLabel `.json` 多格式標註輸出
 - package / script 兩種啟動方式的 import 相容性
+
+通用檔案比對、複製、刪除工具已整合至 `Tools/files/`，並已打包為 `Tools/files/dist/TVRAFileCompareTool.exe`；此工具不綁定 YOLO，可用於未來 OCR 輸出、圖片、JSON、文字檔或其他資料夾同步流程。
 
 ---
 ##

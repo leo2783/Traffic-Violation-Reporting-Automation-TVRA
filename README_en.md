@@ -53,7 +53,7 @@ Enhance system compatibility and intelligence.
 | Image Processing | OpenCV, YOLO (v26), PyTorch / TensorFlow |
 | OCR | PaddleOCR |
 | Automation | Selenium / Playwright (for web form filling) |
-| Data Processing | Pandas, NumPy, FileCompareTool, Sampling, HDBSCAN, UMAP |
+| Data Processing | Pandas, NumPy, FileCompareTool, Sampling, HDBSCAN, UMAP, C++ Hash Accelerator (optional) |
 
 ---
 
@@ -76,6 +76,8 @@ The `Tools/sampling/` directory now functions as a broader data-engineering work
 - an Auto Label workflow based on YOLO high-confidence candidates and embedding-similarity deduplication
 - multi-format annotation export for YOLO `.txt` and AnyLabel `.json`
 - import compatibility for both package and script execution modes
+
+The generic file comparison/copy/delete tool is now integrated under `Tools/files/` and packaged as `Tools/files/dist/TVRAFileCompareTool.exe`. It is not tied to YOLO and can support future OCR outputs, images, JSON files, text files, and other folder synchronization workflows.
 
 ---
 
