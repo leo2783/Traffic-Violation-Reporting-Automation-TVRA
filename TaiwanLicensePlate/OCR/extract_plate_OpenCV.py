@@ -2,34 +2,82 @@ import cv2
 from ultralytics import YOLO
 from pathlib import Path
 
-video_path="input.mp4"
-model_path=r"C:/Users/qet63/Documents/Traffic-Violation-Reporting-Automation-TVRA-/TaiwanLicensePlate/YOLO/Detection/YOLO_V5_Result/V5_test1_detection_1280/weights/V5_test1_detection_1280.pt"
-output_dir=Path("plates")
-output_dir.mkdir(exist_ok=True)
 
-model=YOLO(model_path)
-cap=cv2.VideoCapture(video_path)
+class LicensePlateExtractor:
+    def __init__(
+        self,
+        model_path,
+        output_dir="plates",
+        conf_threshold=0.75,
+        frame_interval=5,
+        iou_threshold=0.45,
+        device="cuda:0"
+    )-> None:
+        self._model_path = model_path
+        self._output_dir = Path(output_dir)
 
-if not cap.isOpened():
-    raise IOError(f"Cannot open video: {video_path}")
+        self._conf_threshold = conf_threshold
+        self._frame_interval = frame_interval
+        self._iou_threshold = iou_threshold
+        self._device = device
 
-frame_count=0
-save_count=0
+        self._output_dir.mkdir(exist_ok=True)
 
-while True:
-    ret, frame=cap.read()
-    if not ret:
-        break
+        self._model = YOLO(self._model_path)
+        
 
-    if frame_count % 5 == 0:  
-        results=model(frame, verbose=False, conf=0.7)
-        for result in results:
-            for box in result.boxes:
-                x1, y1, x2, y2=map(int, box.xyxy[0])
-                plate_img=frame[y1:y2, x1:x2]
-                save_path=output_dir / f"plate_{save_count}.jpg"
-                cv2.imwrite(str(save_path), plate_img)
-                save_count += 1
-    frame_count += 1
-cap.release()
-print(f"Extracted {save_count} license plate images to {output_dir}") 
+    def extract(self,video_path)-> None:
+        self._cap = cv2.VideoCapture(video_path)
+        if not self._cap.isOpened():
+            raise IOError(f"Cannot open video: {video_path}")
+
+        _frame_count = 0
+        _save_count = 0
+
+        try:
+            while True:
+                _ret, _frame = self._cap.read()
+
+                if not _ret:
+                    break
+                if _frame_count % self._frame_interval != 0:
+                    _frame_count += 1
+                    continue
+
+                _h, _w = _frame.shape[:2]
+
+                _min_plate_w = int(_w * 0.02)
+                _min_plate_h = int(_h * 0.01)
+                _result = self._model.predict(_frame,verbose=False,conf=self._conf_threshold,iou=self._iou_threshold,classes=[0],device=self._device,stream=False)[0]
+
+                for _box in _result.boxes:
+                    _x1, _y1, _x2, _y2 = map(int, _box.xyxy[0])
+                    conf = float(_box.conf[0])
+
+                    _x1 = max(0, _x1)
+                    _y1 = max(0, _y1)
+                    _x2 = min(_w, _x2)
+                    _y2 = min(_h, _y2)
+
+                    if _x2 <= _x1 or _y2 <= _y1:
+                        continue
+
+                    _box_w = _x2 - _x1
+                    _box_h = _y2 - _y1
+
+                    if _box_w < _min_plate_w or _box_h < _min_plate_h:
+                        continue
+
+                    _plate_img = _frame[_y1:_y2, _x1:_x2]
+                    _save_path = self._output_dir / f"frame_{_frame_count}_conf_{conf:.2f}_{_save_count}.jpg"
+                    _success = cv2.imwrite(str(_save_path), _plate_img)
+
+                    if _success:
+                        _save_count += 1
+
+                _frame_count += 1
+
+        finally:
+            self._cap.release()
+
+        print(f"Extracted {_save_count} license plate images to {self._output_dir}")
