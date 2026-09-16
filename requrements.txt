@@ -30,7 +30,7 @@ hf-xet==1.4.3
 httpcore==1.0.9
 httpx==0.28.1
 huggingface_hub==1.12.0
-idna==3.13
+idna==3.19
 imgviz==2.0.0
 Jinja2==3.1.6
 jiter==0.14.0
